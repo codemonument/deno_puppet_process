@@ -2,21 +2,27 @@
 
 A wrapper around the native subcommand execution apis of deno (later: bun, node) to easily automate cli processes from the outside.
 
-Provides (planned):
+Provides:
 
-- Mode 1: One-Shot Command execution
+- Mode 1: Interactive Command execution
 
-  - starts the command, returns a promise and waits for it to finish
-  - returns all sort of information about the command (stdout, stderr, exit code, etc.)
+  - Create a {@link PuppetProcess} object, including the command to run
+  - call {@link PuppetProcess.start} to spawn the command
+  - send input to the command as Uint8Array or string via {@link PuppetProcess.std_in} WritableStream
+  - receive output from the command as string via {@link PuppetProcess.std_out}, {@link PuppetProcess.std_err} or {@link PuppetProcess.std_all} ReadableStreams
+  - for graceful exit: wait for the command to finish via {@link PuppetProcess.waitForExit}
+    (for example: when sending an `exit` command to a shell)
+  - for hard exit: kill the long-running command via {@link PuppetProcess.kill}
 
-- Mode 2:Interactive Command execution
-- start a command and get some sort of "session" object to interact with it
-- send input to the command
-- receive output from the command as Uint8Array or string lines
+- Mode 2: One-Shot Command execution (same as Mode 1, but no need to kill the child process):
+  - Create a {@link PuppetProcess} object, including the command to run
+  - call {@link PuppetProcess.start} to spawn the command
+  - receive output from the command as string via {@link PuppetProcess.std_out}, {@link PuppetProcess.std_err} or {@link PuppetProcess.std_all} ReadableStreams
+  - wait for the command to finish via {@link PuppetProcess.waitForExit}
 
-Example cli: `sftp`
+Example cli: `cat`
 
-## Example (with Deno)
+## Example - Run a one-shot cli (with Deno)
 
 ```typescript
 import {simpleCallbackTarget} from '@codemonument/rx-webstreams';
@@ -55,6 +61,10 @@ await process.waitForExit();
 ---
 
 # Changelog
+
+## 0.1.2 - 2024-10-21
+
+- add example for @codemonument/puppet-process/errors module
 
 ## 0.1.1 - 2024-10-21
 
