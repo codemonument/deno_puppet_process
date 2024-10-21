@@ -49,13 +49,6 @@ export class PuppetProcess {
     private std_out_transform = new TextDecoderStream();
     private std_err_transform = new TextDecoderStream();
 
-    /**
-     * A promise that resolves when the child process has finished.
-     * Constructed from piping the child process's stdout and stderr to a transform stream.
-     * This promise resolved when the child process has finished.
-     */
-    private childFinished: Promise<void>;
-
     // Public Props
     /**
      * The output stream of the child process.
@@ -106,18 +99,9 @@ export class PuppetProcess {
         const [stdErr1, stdErr2] = this.std_err_transform.readable.tee();
         this.std_err = stdErr1;
 
-        // setup "child process finished" detection
-        const [stdAll1, stdAll2] = zipReadableStreams(
+        this.std_all = zipReadableStreams(
             stdOut2,
             stdErr2,
-        ).tee();
-        this.std_all = stdAll1;
-        this.childFinished = stdAll2.pipeTo(
-            simpleCallbackTarget(
-                () => {
-                    /* Noop function, we only need the promise of this .pipeTo action to detect if the child process closed or not */
-                },
-            ),
         );
     }
 
@@ -137,11 +121,19 @@ export class PuppetProcess {
      * Waits for the child process to exit.
      * Uses the closing of "std_out" and "std_err" streams to detect when the child process has finished.
      * @returns A promise that resolves when the child process has finished.
-     *
-     * WARNING: When awaiting this without calling this.start(), it waits for a never resolving promise! => bad runtime behavior
+     * @throws An error if the child process is not running.
      */
     async waitForExit(): Promise<void> {
-        await this.childFinished;
+        const child = this.child;
+
+        if (!child) {
+            throw new Error(
+                "Cannot wait for exit of child process that is not running!",
+            );
+        }
+
+        // use child.status getter to detect when the child process has finished
+        await child.status;
 
         // also close std_in, when std_out and std_err are already closed,
         // so that the child process can exit
