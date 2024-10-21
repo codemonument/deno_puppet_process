@@ -3,16 +3,16 @@
 	"version": "0.1.0",
 	"exports": {
 		".": "./src/shared/mod.ts",
-		"./bun": "./src/bun/mod.ts",
 		"./deno": "./src/deno/mod.ts",
-		"./node": "./src/node/mod.ts",
 		"./errors": "./src/errors/mod.ts"
 	},
 	"tasks": {
 		"dev": "deno run --watch main.ts",
 		"test": "deno test -A",
 		"test-docs": "deno test -A --doc",
-		"test-dev": "deno test -A --watch"
+		"test-dev": "deno test -A --watch",
+		"dry": "deno publish --dry-run",
+		"prepare": "deno task test-docs && deno task dry"
 	},
 	"imports": {
 		"/": "./",
