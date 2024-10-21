@@ -37,7 +37,7 @@ export class PuppetProcess {
     /**
      * A stream that combines the child process's stdout and stderr.
      */
-    public std_all: ReadableStream<string>;
+    public readonly std_all: ReadableStream<string>;
 
     /**
      * A stream that gets written to the child process's stdin.
