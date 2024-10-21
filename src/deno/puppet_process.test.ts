@@ -6,6 +6,9 @@ Deno.test("Deno PuppetProcess init", async () => {
         command: `echo "Hello, world!"`,
     });
 
+    // Here, we write to the process's stdin, before the child process has started.
+    // => Stdin written before the child process has started will be buffered until the child process starts.
+    //    (Quantity of buffering not known right now)
     process.std_in.getWriter().write("Hello, world!");
 
     assertExists(process);

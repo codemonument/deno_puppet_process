@@ -53,6 +53,15 @@ export class PuppetProcess {
     public readonly std_out = new ReadableStream();
     public readonly std_err = new ReadableStream();
     public readonly std_all = new ReadableStream();
+
+    /**
+     * A stream that gets written to the child process's stdin.
+     * If the child process is not running, the data will be buffered until the child process starts.
+     * The buffer size is not known right now.
+     * It accepts as inputs:
+     * - `string` (will be encoded as utf8 to `Uint8Array` using `TextEncoder`)
+     * - `Uint8Array` (will be passed through as is)
+     */
     public readonly std_in = this.std_in_transform.writable;
 
     constructor(options: PuppetProcessOptions) {
