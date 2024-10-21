@@ -1,6 +1,7 @@
 import type { GenericLogger } from "../shared/GenericLogger.type.ts";
 import { simpleCallbackTarget } from "@codemonument/rx-webstreams";
 import { zipReadableStreams } from "@std/streams/zip-readable-streams";
+import { ChildProcessNotRunningError } from "/src/errors/mod.ts";
 
 export type PuppetProcessOptions = {
     /**
@@ -75,6 +76,28 @@ export class PuppetProcess {
      *
      * CAUTION: If you use std_in.getWriter() to get a writer,
      * you must close the writer explicitly to avoid blocking the closing of the child process!
+     *
+     * @example
+     * ```typescript
+     * import { PuppetProcess } from "@codemonument/puppet-process/deno";
+     * import { assertRejects } from "@std/assert";
+     * import { delay } from "@std/async";
+     *
+     * const process = new PuppetProcess({
+     *    command: `cat`,
+     * });
+     *
+     * process.start();
+     * const writer = process.std_in.getWriter();
+     * writer.write("Hello, world!");
+     *
+     * await delay(50);
+     * // Close the writer explicitly to avoid dangling stdin stream
+     * await writer.close();
+     * // Note: some cli-tools, like `cat`, will exit when the writer for stdin is closed, so they don't need to be killed afterwards
+     * await process.kill();
+     *
+     * ```
      */
     public readonly std_in = this.std_in_transform.writable;
 
@@ -121,14 +144,14 @@ export class PuppetProcess {
      * Waits for the child process to exit.
      * Uses the closing of "std_out" and "std_err" streams to detect when the child process has finished.
      * @returns A promise that resolves when the child process has finished.
-     * @throws An error if the child process is not running.
+     * @throws ChildProcessNotRunningError
      */
     async waitForExit(): Promise<void> {
         const child = this.child;
 
         if (!child) {
-            throw new Error(
-                "Cannot wait for exit of child process that is not running!",
+            throw new ChildProcessNotRunningError(
+                `Cannot wait for exit of child process that is not running!`,
             );
         }
 
@@ -139,6 +162,7 @@ export class PuppetProcess {
         // so that the child process can exit
         if (this.std_in.locked === false) {
             await this.std_in.close();
+            return;
         }
 
         // @bjesuiter: This warning seems to not be necessary, the deno process can exit cleanly when anything, that locks this.std_in is closed correctly.
@@ -149,25 +173,18 @@ export class PuppetProcess {
 
     /**
      * Kills the child process.
-     * @returns `true` if the process was successfully killed, `false` if the process was not running or an error happened while killing the process.
+     * @returns A resolved promise if the process was successfully killed
+     * @throws ChildProcessNotRunningError
+     * @throws Error - when some unknown error occurs while killing the process
      */
-    async kill(): Promise<boolean> {
-        // const childStatus = await this.child?.status;
+    async kill(): Promise<void> {
         if (!this.child) {
-            this.logger.warn(
-                "Attempted to kill a PuppetProcess that is not running.",
+            throw new ChildProcessNotRunningError(
+                `Attempted to kill a PuppetProcess that is not running.`,
             );
-            return Promise.resolve(false);
         }
 
-        try {
-            this.child?.kill();
-            await this.waitForExit();
-        } catch (error) {
-            this.logger.error("Error while killing process:", error);
-            return Promise.resolve(false);
-        }
-
-        return true;
+        this.child?.kill();
+        await this.waitForExit();
     }
 }

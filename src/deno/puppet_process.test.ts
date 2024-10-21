@@ -52,5 +52,9 @@ Deno.test("(deno) PuppetProcess - assert stdin => stdout", async () => {
     await delay(50);
     // close the writer explicitly to avoid dangling stdin stream after child process has finished
     await writer.close();
-    await process.kill();
+
+    // CAUTION: Some cli-tools, like "cat", will exit when the writer for stdin is closed,
+    // since this closing sends an EOF signal to the child process!
+    // SO: we only need to wait for exit here, instead of killing the process.
+    await process.waitForExit();
 });
