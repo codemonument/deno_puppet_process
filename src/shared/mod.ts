@@ -36,3 +36,4 @@
  */
 
 export { type GenericLogger } from "./GenericLogger.type.ts";
+export { type PuppetProcessOptions } from "./PuppetProcessOptions.type.ts";

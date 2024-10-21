@@ -1,23 +1,7 @@
 import { zipReadableStreams } from "@std/streams/zip-readable-streams";
-import type { GenericLogger } from "../shared/GenericLogger.type.ts";
 import { ChildProcessNotRunningError } from "/src/errors/mod.ts";
-
-export type PuppetProcessOptions = {
-    /**
-     * The command which should be run as {@link PuppetProcess}.
-     * - Format: Space-Delimited String: `echo "Hello, world!"`
-     * - params for the command can be interpolated by using `${param}` and passing the resulting string to {@link PuppetProcess}.
-     *   Example: `echo "Hello, ${name}!"`
-     */
-    command: string;
-
-    /**
-     * An optional instance of a logger.
-     * If not provided, the default logger will be `console`.
-     * Can be used to pipe log messages to a custom logger.
-     */
-    logger?: GenericLogger;
-};
+import type { GenericLogger } from "/src/shared/GenericLogger.type.ts";
+import type { PuppetProcessOptions } from "/src/shared/PuppetProcessOptions.type.ts";
 
 /**
  * This class is used to spawn a new process and interact with it.
