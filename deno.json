@@ -1,6 +1,6 @@
 {
 	"name": "@codemonument/puppet-process",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"exports": {
 		".": "./src/shared/mod.ts",
 		"./deno": "./src/deno/mod.ts",
