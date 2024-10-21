@@ -10,8 +10,8 @@
 	},
 	"tasks": {
 		"dev": "deno run --watch main.ts",
-		"test": "deno test -A",
-		"test-dev": "deno test -A --watch"
+		"test": "deno test -A --doc",
+		"test-dev": "deno test -A --doc --watch"
 	},
 	"imports": {
 		"/": "./",
