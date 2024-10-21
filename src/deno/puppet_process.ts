@@ -1,6 +1,5 @@
-import type { GenericLogger } from "../shared/GenericLogger.type.ts";
-import { simpleCallbackTarget } from "@codemonument/rx-webstreams";
 import { zipReadableStreams } from "@std/streams/zip-readable-streams";
+import type { GenericLogger } from "../shared/GenericLogger.type.ts";
 import { ChildProcessNotRunningError } from "/src/errors/mod.ts";
 
 export type PuppetProcessOptions = {
