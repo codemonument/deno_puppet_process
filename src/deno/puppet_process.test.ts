@@ -1,6 +1,7 @@
 import { assertEquals, assertExists } from "@std/assert";
 import { PuppetProcess } from "./puppet_process.ts";
 import { simpleCallbackTarget } from "@codemonument/rx-webstreams";
+import { delay } from "@std/async";
 
 Deno.test("Deno PuppetProcess instantiation", () => {
     const process = new PuppetProcess({
@@ -39,11 +40,10 @@ Deno.test("Deno PuppetProcess stdin => stdout", async () => {
 
     process.start();
 
-    setTimeout(async () => {
-        // close the writer explicitly to avoid it blocking the closing of the child process
-        await writer.close();
-        process.kill();
-    }, 50);
+    await delay(50);
+    // close the writer explicitly to avoid it blocking the closing of the child process
+    await writer.close();
+    process.kill();
 
     await process.waitForExit();
 });

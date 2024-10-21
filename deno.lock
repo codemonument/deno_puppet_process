@@ -4,6 +4,8 @@
     "jsr:@codemonument/rx-webstreams@~0.9.4": "0.9.4",
     "jsr:@std/assert@0.223": "0.223.0",
     "jsr:@std/assert@1": "1.0.6",
+    "jsr:@std/async@*": "1.0.6",
+    "jsr:@std/async@^1.0.6": "1.0.6",
     "jsr:@std/bytes@0.223": "0.223.0",
     "jsr:@std/bytes@^1.0.2": "1.0.2",
     "jsr:@std/fmt@0.223": "0.223.0",
@@ -32,6 +34,9 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
+    },
+    "@std/async@1.0.6": {
+      "integrity": "6d262156dd35c4a72ee1a2f8679be40264f370cfb92e2e13d4eca2ae05e16f34"
     },
     "@std/bytes@0.223.0": {
       "integrity": "84b75052cd8680942c397c2631318772b295019098f40aac5c36cead4cba51a8"
@@ -80,6 +85,7 @@
     "dependencies": [
       "jsr:@codemonument/rx-webstreams@~0.9.4",
       "jsr:@std/assert@1",
+      "jsr:@std/async@^1.0.6",
       "jsr:@std/streams@^1.0.7"
     ]
   }
