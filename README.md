@@ -51,3 +51,21 @@ await process.waitForExit();
 ## Credits
 
 - draw inspiration from [deno_simple_exec](https://github.com/codemonument/deno_simple_exec)
+
+---
+
+# Changelog
+
+## 0.1.1 - 2024-10-21
+
+- improved documentation, as suggested by jsr
+
+## 0.1.0 - 2024-10-21 - initial release
+
+Features:
+
+- creating a puppet process with deno
+- sending input to the process
+- receiving output from the process
+- waiting for the process to finish
+- killing the process
