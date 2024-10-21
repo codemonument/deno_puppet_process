@@ -43,7 +43,5 @@ Deno.test("Deno PuppetProcess stdin => stdout", async () => {
     await delay(50);
     // close the writer explicitly to avoid it blocking the closing of the child process
     await writer.close();
-    process.kill();
-
-    await process.waitForExit();
+    await process.kill();
 });
