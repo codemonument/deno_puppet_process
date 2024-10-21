@@ -1,9 +1,9 @@
-import { assertEquals, assertExists } from "@std/assert";
+import { assertEquals, assertExists, assertRejects } from "@std/assert";
 import { PuppetProcess } from "./puppet_process.ts";
 import { simpleCallbackTarget } from "@codemonument/rx-webstreams";
 import { delay } from "@std/async";
 
-Deno.test("Deno PuppetProcess instantiation", () => {
+Deno.test("new PuppetProcess()", () => {
     const process = new PuppetProcess({
         command: `echo "Hello, world!"`,
     });
@@ -12,7 +12,18 @@ Deno.test("Deno PuppetProcess instantiation", () => {
     assertExists(process);
 });
 
-Deno.test("Deno PuppetProcess stdout", async () => {
+Deno.test(
+    "(deno) PuppetProcess - error on .waitForExit() before .start()",
+    () => {
+        const process = new PuppetProcess({
+            command: `echo "Hello, world!"`,
+        });
+
+        assertRejects(() => process.waitForExit());
+    },
+);
+
+Deno.test("(deno) PuppetProcess - assert stdout", async () => {
     const process = new PuppetProcess({
         command: `echo "Hello, world!"`,
     });
@@ -25,7 +36,7 @@ Deno.test("Deno PuppetProcess stdout", async () => {
     await process.waitForExit();
 });
 
-Deno.test("Deno PuppetProcess stdin => stdout", async () => {
+Deno.test("(deno) PuppetProcess - assert stdin => stdout", async () => {
     const process = new PuppetProcess({
         command: `cat`,
     });
