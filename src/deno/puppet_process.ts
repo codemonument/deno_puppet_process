@@ -137,6 +137,8 @@ export class PuppetProcess {
      * Waits for the child process to exit.
      * Uses the closing of "std_out" and "std_err" streams to detect when the child process has finished.
      * @returns A promise that resolves when the child process has finished.
+     *
+     * WARNING: When awaiting this without calling this.start(), it waits for a never resolving promise! => bad runtime behavior
      */
     async waitForExit(): Promise<void> {
         await this.childFinished;
@@ -157,19 +159,21 @@ export class PuppetProcess {
      * Kills the child process.
      * @returns `true` if the process was successfully killed, `false` if the process was not running or an error happened while killing the process.
      */
-    kill(): boolean {
+    async kill(): Promise<boolean> {
+        // const childStatus = await this.child?.status;
         if (!this.child) {
             this.logger.warn(
                 "Attempted to kill a PuppetProcess that is not running.",
             );
-            return false;
+            return Promise.resolve(false);
         }
 
         try {
             this.child?.kill();
+            await this.waitForExit();
         } catch (error) {
             this.logger.error("Error while killing process:", error);
-            return false;
+            return Promise.resolve(false);
         }
 
         return true;

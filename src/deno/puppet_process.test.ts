@@ -2,23 +2,13 @@ import { assertEquals, assertExists } from "@std/assert";
 import { PuppetProcess } from "./puppet_process.ts";
 import { simpleCallbackTarget } from "@codemonument/rx-webstreams";
 
-Deno.test("Deno PuppetProcess instantiation", async () => {
+Deno.test("Deno PuppetProcess instantiation", () => {
     const process = new PuppetProcess({
         command: `echo "Hello, world!"`,
     });
 
     // Test 1: assert that the class constructor of PuppetProcess has run successfully.
     assertExists(process);
-
-    // Here, we write to the process's stdin, before the child process has started.
-    // => Stdin written before the child process has started will be buffered until the child process starts.
-    //    (Quantity of buffering not known right now)
-    // const writer = process.std_in.getWriter();
-    // writer.write("Hello, world!");
-
-    // process.start();
-
-    await process.waitForExit();
 });
 
 Deno.test("Deno PuppetProcess stdout", async () => {
@@ -34,7 +24,7 @@ Deno.test("Deno PuppetProcess stdout", async () => {
     await process.waitForExit();
 });
 
-Deno.test.only("Deno PuppetProcess stdin => stdout", async () => {
+Deno.test("Deno PuppetProcess stdin => stdout", async () => {
     const process = new PuppetProcess({
         command: `cat`,
     });
