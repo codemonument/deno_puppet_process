@@ -21,7 +21,7 @@ Deno.test("Deno PuppetProcess instantiation", async () => {
     await process.waitForExit();
 });
 
-Deno.test.only("Deno PuppetProcess stdout", async () => {
+Deno.test("Deno PuppetProcess stdout", async () => {
     const process = new PuppetProcess({
         command: `echo "Hello, world!"`,
     });
@@ -31,11 +31,10 @@ Deno.test.only("Deno PuppetProcess stdout", async () => {
     }));
 
     process.start();
-
     await process.waitForExit();
 });
 
-Deno.test("Deno PuppetProcess stdin => stdout", async () => {
+Deno.test.only("Deno PuppetProcess stdin => stdout", async () => {
     const process = new PuppetProcess({
         command: `cat`,
     });
@@ -45,14 +44,16 @@ Deno.test("Deno PuppetProcess stdin => stdout", async () => {
     process.std_out.pipeTo(simpleCallbackTarget((chunk) => {
         assertEquals(chunk, testChunk);
     }));
-
-    process.std_in.getWriter().write(testChunk);
+    const writer = process.std_in.getWriter();
+    writer.write(testChunk);
 
     process.start();
 
-    setTimeout(() => {
+    setTimeout(async () => {
+        // close the writer explicitly to avoid it blocking the closing of the child process
+        await writer.close();
         process.kill();
-    }, 1000);
+    }, 50);
 
     await process.waitForExit();
 });

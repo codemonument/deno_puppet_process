@@ -79,6 +79,9 @@ export class PuppetProcess {
      * It accepts as inputs:
      * - `string` (will be encoded as utf8 to `Uint8Array` using `TextEncoder`)
      * - `Uint8Array` (will be passed through as is)
+     *
+     * CAUTION: If you use std_in.getWriter() to get a writer,
+     * you must close the writer explicitly to avoid blocking the closing of the child process!
      */
     public readonly std_in = this.std_in_transform.writable;
 
@@ -140,7 +143,14 @@ export class PuppetProcess {
 
         // also close std_in, when std_out and std_err are already closed,
         // so that the child process can exit
-        this.std_in.close();
+        if (this.std_in.locked === false) {
+            await this.std_in.close();
+        }
+
+        // @bjesuiter: This warning seems to not be necessary, the deno process can exit cleanly when anything, that locks this.std_in is closed correctly.
+        // this.logger.warn(
+        //     "Warning: std_in is locked, so it will not be closed explicitely. This might block the closing of the child process.",
+        // );
     }
 
     /**
