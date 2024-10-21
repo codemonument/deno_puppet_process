@@ -49,13 +49,28 @@ export class PuppetProcess {
     private std_out_transform = new TextDecoderStream();
     private std_err_transform = new TextDecoderStream();
 
+    /**
+     * A promise that resolves when the child process has finished.
+     * Constructed from piping the child process's stdout and stderr to a transform stream.
+     * This promise resolved when the child process has finished.
+     */
+    private childFinished: Promise<void>;
+
     // Public Props
     /**
      * The output stream of the child process.
      */
-    public readonly std_out = this.std_out_transform.readable;
-    public readonly std_err = this.std_err_transform.readable;
-    public readonly std_all = zipReadableStreams(this.std_out, this.std_err);
+    public readonly std_out: ReadableStream<string>;
+
+    /**
+     * The error stream of the child process.
+     */
+    public readonly std_err: ReadableStream<string>;
+
+    /**
+     * A stream that combines the child process's stdout and stderr.
+     */
+    public std_all: ReadableStream<string>;
 
     /**
      * A stream that gets written to the child process's stdin.
@@ -70,15 +85,37 @@ export class PuppetProcess {
     constructor(options: PuppetProcessOptions) {
         this.options = options;
         this.logger = options.logger ?? console as GenericLogger;
-        this.logger.log("PuppetProcess created with options:", options);
+        this.logger.debug("PuppetProcess created with options:", options);
 
         const [executable, ...args] = options.command.split(" ");
         const cmd = new Deno.Command(executable, {
             args,
             stdout: "piped",
             stderr: "piped",
+            stdin: "piped",
         });
         this.cmd = cmd;
+
+        // setup std_out and std_err streams correctly (without teeing them, they would be consumed by the std_all stream)
+        const [stdOut1, stdOut2] = this.std_out_transform.readable.tee();
+        this.std_out = stdOut1;
+
+        const [stdErr1, stdErr2] = this.std_err_transform.readable.tee();
+        this.std_err = stdErr1;
+
+        // setup "child process finished" detection
+        const [stdAll1, stdAll2] = zipReadableStreams(
+            stdOut2,
+            stdErr2,
+        ).tee();
+        this.std_all = stdAll1;
+        this.childFinished = stdAll2.pipeTo(
+            simpleCallbackTarget(
+                () => {
+                    /* Noop function, we only need the promise of this .pipeTo action to detect if the child process closed or not */
+                },
+            ),
+        );
     }
 
     start() {
@@ -93,11 +130,21 @@ export class PuppetProcess {
         this.child.stderr.pipeTo(this.std_err_transform.writable);
     }
 
+    /**
+     * Waits for the child process to exit.
+     * Uses the closing of "std_out" and "std_err" streams to detect when the child process has finished.
+     * @returns A promise that resolves when the child process has finished.
+     */
     async waitForExit(): Promise<void> {
-        await this.child?.output();
+        await this.childFinished;
+
+        // also close std_in, when std_out and std_err are already closed,
+        // so that the child process can exit
+        this.std_in.close();
     }
 
     /**
+     * Kills the child process.
      * @returns `true` if the process was successfully killed, `false` if the process was not running or an error happened while killing the process.
      */
     kill(): boolean {
