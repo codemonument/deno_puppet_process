@@ -33,20 +33,10 @@ export class PuppetProcess {
     // Runtime Props
     private cmd: Deno.Command;
     private child?: Deno.ChildProcess;
-    private std_in_transform = new TransformStream<
+    private std_in_transform: TransformStream<
         string | Uint8Array,
         Uint8Array
-    >({
-        start: (_controller) => {
-        },
-        transform: (chunk, controller) => {
-            if (typeof chunk === "string") {
-                controller.enqueue(this.textEncoder.encode(chunk));
-            } else {
-                controller.enqueue(chunk);
-            }
-        },
-    });
+    >;
     private std_out_transform = new TextDecoderStream();
     private std_err_transform = new TextDecoderStream();
 
@@ -99,7 +89,7 @@ export class PuppetProcess {
      *
      * ```
      */
-    public readonly std_in = this.std_in_transform.writable;
+    public readonly std_in: WritableStream<string | Uint8Array>;
 
     constructor(options: PuppetProcessOptions) {
         this.options = options;
@@ -114,6 +104,23 @@ export class PuppetProcess {
             stdin: "piped",
         });
         this.cmd = cmd;
+
+        // setup std_in
+        this.std_in_transform = new TransformStream<
+            string | Uint8Array,
+            Uint8Array
+        >({
+            start: (_controller) => {
+            },
+            transform: (chunk, controller) => {
+                if (typeof chunk === "string") {
+                    controller.enqueue(this.textEncoder.encode(chunk));
+                } else {
+                    controller.enqueue(chunk);
+                }
+            },
+        });
+        this.std_in = this.std_in_transform.writable;
 
         // setup std_out and std_err streams correctly (without teeing them, they would be consumed by the std_all stream)
         const [stdOut1, stdOut2] = this.std_out_transform.readable.tee();
