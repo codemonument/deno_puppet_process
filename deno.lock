@@ -5,12 +5,14 @@
     "jsr:@std/assert@0.223": "0.223.0",
     "jsr:@std/assert@1": "1.0.6",
     "jsr:@std/bytes@0.223": "0.223.0",
+    "jsr:@std/bytes@^1.0.2": "1.0.2",
     "jsr:@std/fmt@0.223": "0.223.0",
     "jsr:@std/fs@0.223": "0.223.0",
     "jsr:@std/internal@^1.0.4": "1.0.4",
     "jsr:@std/io@0.223": "0.223.0",
     "jsr:@std/io@0.223.0": "0.223.0",
     "jsr:@std/log@0.223.0": "0.223.0",
+    "jsr:@std/streams@^1.0.7": "1.0.7",
     "npm:zod@3.22.4": "3.22.4"
   },
   "jsr": {
@@ -34,6 +36,9 @@
     "@std/bytes@0.223.0": {
       "integrity": "84b75052cd8680942c397c2631318772b295019098f40aac5c36cead4cba51a8"
     },
+    "@std/bytes@1.0.2": {
+      "integrity": "fbdee322bbd8c599a6af186a1603b3355e59a5fb1baa139f8f4c3c9a1b3e3d57"
+    },
     "@std/fmt@0.223.0": {
       "integrity": "6deb37794127dfc7d7bded2586b9fc6f5d50e62a8134846608baf71ffc1a5208"
     },
@@ -47,7 +52,7 @@
       "integrity": "2d8c3c2ab3a515619b90da2c6ff5ea7b75a94383259ef4d02116b228393f84f1",
       "dependencies": [
         "jsr:@std/assert@0.223",
-        "jsr:@std/bytes"
+        "jsr:@std/bytes@0.223"
       ]
     },
     "@std/log@0.223.0": {
@@ -57,6 +62,12 @@
         "jsr:@std/fmt",
         "jsr:@std/fs",
         "jsr:@std/io@0.223"
+      ]
+    },
+    "@std/streams@1.0.7": {
+      "integrity": "1a93917ca0c58c01b2bfb93647189229b1702677f169b6fb61ad6241cd2e499b",
+      "dependencies": [
+        "jsr:@std/bytes@^1.0.2"
       ]
     }
   },
@@ -68,7 +79,8 @@
   "workspace": {
     "dependencies": [
       "jsr:@codemonument/rx-webstreams@~0.9.4",
-      "jsr:@std/assert@1"
+      "jsr:@std/assert@1",
+      "jsr:@std/streams@^1.0.7"
     ]
   }
 }

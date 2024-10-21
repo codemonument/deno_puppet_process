@@ -1,5 +1,6 @@
 import type { GenericLogger } from "../shared/GenericLogger.type.ts";
 import { simpleCallbackTarget } from "@codemonument/rx-webstreams";
+import { zipReadableStreams } from "@std/streams/zip-readable-streams";
 
 export type PuppetProcessOptions = {
     /**
@@ -45,14 +46,16 @@ export class PuppetProcess {
             }
         },
     });
+    private std_out_transform = new TextDecoderStream();
+    private std_err_transform = new TextDecoderStream();
 
     // Public Props
     /**
      * The output stream of the child process.
      */
-    public readonly std_out = new ReadableStream();
-    public readonly std_err = new ReadableStream();
-    public readonly std_all = new ReadableStream();
+    public readonly std_out = this.std_out_transform.readable;
+    public readonly std_err = this.std_err_transform.readable;
+    public readonly std_all = zipReadableStreams(this.std_out, this.std_err);
 
     /**
      * A stream that gets written to the child process's stdin.
@@ -80,10 +83,14 @@ export class PuppetProcess {
 
     start() {
         this.child = this.cmd.spawn();
+        if (!this.child) {
+            throw new Error("Failed to spawn child process.");
+        }
 
-        this.std_in_transform.readable.pipeTo(simpleCallbackTarget((chunk) => {
-            this.logger.log(`stdin: ${chunk}`);
-        }));
+        // pipe all stdio streams
+        this.std_in_transform.readable.pipeTo(this.child.stdin);
+        this.child.stdout.pipeTo(this.std_out_transform.writable);
+        this.child.stderr.pipeTo(this.std_err_transform.writable);
     }
 
     async waitForExit(): Promise<void> {
