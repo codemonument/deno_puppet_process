@@ -2,13 +2,14 @@ import { zipReadableStreams } from "@std/streams/zip-readable-streams";
 import { ChildProcessNotRunningError } from "/src/errors/mod.ts";
 import type { GenericLogger } from "/src/shared/GenericLogger.type.ts";
 import type { PuppetProcessOptions } from "/src/shared/PuppetProcessOptions.type.ts";
+import type { PuppetProcessShape } from "/src/shared/PuppetProcessShape.type.ts";
 
 /**
  * This class is used to spawn a new process and interact with it.
  * It is NOT inteded to run child processes one-time, but rather to keep them running and interact with them.
  * (At least for now, maybe I'll add this functionality later.)
  */
-export class PuppetProcess {
+export class PuppetProcess implements PuppetProcessShape {
     private options: PuppetProcessOptions;
     private logger: GenericLogger;
     private textEncoder = new TextEncoder();
@@ -55,7 +56,6 @@ export class PuppetProcess {
      * import { PuppetProcess } from "@codemonument/puppet-process/deno";
      * import { assertRejects } from "@std/assert";
      * import { delay } from "@std/async";
-     *
      * const process = new PuppetProcess({
      *    command: `cat`,
      * });
