@@ -1,7 +1,7 @@
-import { assertEquals, assertExists, assertRejects } from "@std/assert";
-import { PuppetProcess } from "./puppet_process.ts";
 import { simpleCallbackTarget } from "@codemonument/rx-webstreams";
+import { assertEquals, assertExists, assertRejects } from "@std/assert";
 import { delay } from "@std/async";
+import { PuppetProcess } from "./puppet_process.ts";
 
 Deno.test("new PuppetProcess()", () => {
     const process = new PuppetProcess({
@@ -41,18 +41,16 @@ Deno.test("(deno) PuppetProcess - assert stdin => stdout", async () => {
         command: `cat`,
     });
 
-    const testChunk = "Hello, world!";
-
     process.std_out.pipeTo(simpleCallbackTarget((chunk) => {
-        assertEquals(chunk, testChunk);
+        assertEquals(chunk, "Hello, world!");
     }));
     const writer = process.std_in.getWriter();
-    writer.write(testChunk);
+    writer.write("Hello, world!");
 
     process.start();
 
     await delay(50);
-    // close the writer explicitly to avoid it blocking the closing of the child process
+    // close the writer explicitly to avoid dangling stdin stream after child process has finished
     await writer.close();
     await process.kill();
 });
