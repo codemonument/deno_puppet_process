@@ -85,6 +85,7 @@ export class PuppetProcess implements PuppetProcessShape {
             stdout: "piped",
             stderr: "piped",
             stdin: "piped",
+            cwd: options.cwd,
         });
         this.cmd = cmd;
 

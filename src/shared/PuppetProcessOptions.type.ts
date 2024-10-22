@@ -15,4 +15,10 @@ export type PuppetProcessOptions = {
      * Can be used to pipe log messages to a custom logger.
      */
     logger?: GenericLogger;
+
+    /**
+     * The working directory for the child process.
+     * If not specified, the cwd of the parent process is used.
+     */
+    cwd?: string | URL | undefined;
 };
