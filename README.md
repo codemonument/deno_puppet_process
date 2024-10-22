@@ -62,6 +62,11 @@ await process.waitForExit();
 
 # Changelog
 
+## 1.0.0 - 2024-10-22
+
+- first stable release
+- add optional `cwd` option to `PuppetProcess` constructor - changes the current working directory of the spawned process
+
 ## 0.1.2 - 2024-10-21
 
 - add example for @codemonument/puppet-process/errors module
