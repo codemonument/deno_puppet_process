@@ -77,7 +77,6 @@ export class PuppetProcess implements PuppetProcessShape {
     constructor(options: PuppetProcessOptions) {
         this.options = options;
         this.logger = options.logger ?? console as GenericLogger;
-        this.logger.debug("PuppetProcess created with options:", options);
 
         const [executable, ...args] = options.command.split(" ");
         const cmd = new Deno.Command(executable, {

@@ -62,6 +62,10 @@ await process.waitForExit();
 
 # Changelog
 
+## 1.0.1 - 2024-10-22
+
+- remove annoying debug log in `PuppetProcess` constructor
+
 ## 1.0.0 - 2024-10-22
 
 - first stable release
