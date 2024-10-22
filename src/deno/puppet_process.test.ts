@@ -1,6 +1,7 @@
 import { simpleCallbackTarget } from "@codemonument/rx-webstreams";
 import { assertEquals, assertExists, assertRejects } from "@std/assert";
 import { delay } from "@std/async";
+import { join } from "@std/path";
 import { PuppetProcess } from "./puppet_process.ts";
 
 Deno.test("new PuppetProcess()", () => {
@@ -57,4 +58,30 @@ Deno.test("(deno) PuppetProcess - assert stdin => stdout", async () => {
     // since this closing sends an EOF signal to the child process!
     // SO: we only need to wait for exit here, instead of killing the process.
     await process.waitForExit();
+});
+
+Deno.test("(deno) PuppetProcess - assert cwd option", async (t) => {
+    const currentCwd = Deno.cwd();
+    const playgroundCwd = join(currentCwd, "playground");
+
+    const processWithoutCwd = new PuppetProcess({
+        command: `pwd`,
+    });
+
+    const processWithCwd = new PuppetProcess({
+        command: `pwd`,
+        cwd: "./playground",
+    });
+
+    processWithoutCwd.std_out.pipeTo(simpleCallbackTarget((chunk) => {
+        assertEquals(chunk, currentCwd + "\n");
+    }));
+    processWithoutCwd.start();
+    await processWithoutCwd.waitForExit();
+
+    processWithCwd.std_out.pipeTo(simpleCallbackTarget((chunk) => {
+        assertEquals(chunk, playgroundCwd + "\n");
+    }));
+    processWithCwd.start();
+    await processWithCwd.waitForExit();
 });
